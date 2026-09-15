@@ -1,0 +1,41 @@
+name: notify-consumers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify consumer repositories
+        env:
+          GH_TOKEN: ${{ secrets.SKILLS_SYNC_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "SKILLS_SYNC_TOKEN not configured; skipping consumer dispatch"
+            exit 0
+          fi
+          sha="${GITHUB_SHA}"
+          # skills-toolchain is consumed by every skill package + every
+          # plugin that vendors skills; notify each so they can re-pin
+          # their toolchain version on the next sync cycle.
+          for repo in \
+            full-stack-skills/skills-toolchain \
+            full-aigc-skills/image-factory-skills \
+            full-aigc-skills/dreamina-skills \
+            full-aigc-skills/blender-skills \
+            full-aigc-skills/video-factory-skills \
+            full-aigc-skills/maya-skills \
+            full-stack-skills/stitch-skills \
+            partme-ai/codex-processon-plugin \
+            partme-ai/codex-stitch-plugin \
+            partme-ai/codex-image-factory-plugin ; do
+            gh api "repos/${repo}/dispatches" \
+              -f event_type=toolchain-updated \
+              -F "client_payload[package]=skills-toolchain" \
+              -F "client_payload[sha]=${sha}"
+            echo "dispatched toolchain-updated to ${repo} at ${sha}"
+          done
