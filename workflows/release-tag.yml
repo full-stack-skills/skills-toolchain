@@ -1,0 +1,54 @@
+name: release-tag
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+      - name: Read current version
+        id: v
+        run: |
+          version=$(python3 -c "import json;print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Move tag if version differs from current main
+        env:
+          GH_TOKEN: ${{ secrets.SKILLS_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          version="${{ steps.v.outputs.version }}"
+          current=$(gh api "repos/${{ github.repository }}/git/refs/tags/v$version" --jq '.object.sha' 2>/dev/null || echo "")
+          head_sha="${{ github.sha }}"
+          if [ "$current" = "$head_sha" ]; then
+            echo "tag v$version already points to HEAD ($head_sha)"
+            exit 0
+          fi
+          git tag -fa "v$version" -m "Release v$version" HEAD
+          git push --force origin "refs/tags/v$version"
+          echo "tag v$version advanced to $head_sha"
+      - name: Notify consumer packages
+        env:
+          GH_TOKEN: ${{ secrets.SKILLS_SYNC_TOKEN }}
+        run: |
+          version="${{ steps.v.outputs.version }}"
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "SKILLS_SYNC_TOKEN not configured; skipping consumer dispatch"
+            exit 0
+          fi
+          # consumer list lives in docs/CONSUMERS.md
+          while IFS= read -r repo; do
+            [ -z "$repo" ] && continue
+            gh api "repos/${repo}/dispatches" \
+              -f event_type=toolchain-updated \
+              -F "client_payload[package]=skills-toolchain" \
+              -F "client_payload[version]=${version}" \
+              -F "client_payload[sha]=${{ github.sha }}"
+            echo "dispatched toolchain-updated to ${repo}"
+          done < <(grep -oE '[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+' docs/CONSUMERS.md)
