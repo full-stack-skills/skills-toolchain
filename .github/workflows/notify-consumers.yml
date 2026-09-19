@@ -9,6 +9,7 @@ jobs:
   dispatch:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Notify consumer repositories
         env:
           GH_TOKEN: ${{ secrets.SKILLS_SYNC_TOKEN }}
@@ -19,11 +20,17 @@ jobs:
             exit 0
           fi
           sha="${GITHUB_SHA}"
+          failed=0
           # docs/CONSUMERS.md is the reviewed source of downstream identities.
-          grep -oE '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$' docs/CONSUMERS.md | while IFS= read -r repo; do
-            gh api "repos/${repo}/dispatches" \
+          while IFS= read -r repo; do
+            if gh api "repos/${repo}/dispatches" \
               -f event_type=toolchain-updated \
               -F "client_payload[package]=skills-toolchain" \
-              -F "client_payload[sha]=${sha}"
-            echo "dispatched toolchain-updated to ${repo} at ${sha}"
-          done
+              -F "client_payload[sha]=${sha}"; then
+              echo "dispatched toolchain-updated to ${repo} at ${sha}"
+            else
+              echo "ERROR: failed to dispatch toolchain-updated to ${repo}" >&2
+              failed=1
+            fi
+          done < <(grep -oE '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$' docs/CONSUMERS.md)
+          exit "$failed"

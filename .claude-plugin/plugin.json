@@ -1,6 +1,6 @@
 {
   "name": "skills-toolchain",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "L0 vendor tooling for the full-aigc and full-stack skills ecosystems. Single source of the lockfile schema, lint gate, vendor script, and CI workflow templates consumed by every skill package and plugin.",
   "author": {
     "name": "PartMe.AI",

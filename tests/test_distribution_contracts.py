@@ -10,12 +10,14 @@ ROOT = Path(__file__).resolve().parents[1]
 class DistributionContractsTest(unittest.TestCase):
     def test_package_version_is_patch_release(self):
         manifest = json.loads((ROOT / ".claude-plugin/plugin.json").read_text())
-        self.assertEqual(manifest["version"], "1.0.1")
+        self.assertEqual(manifest["version"], "1.0.2")
 
     def test_consumer_dispatch_uses_registry_without_legacy_host_repos(self):
         workflow = (ROOT / ".github/workflows/notify-consumers.yml").read_text()
+        self.assertIn("actions/checkout@", workflow)
         self.assertIn("docs/CONSUMERS.md", workflow)
         self.assertNotRegex(workflow, r"partme-ai/codex-[a-z-]+-plugin")
+        self.assertIn("done < <(grep", workflow)
 
         consumers = (ROOT / "docs/CONSUMERS.md").read_text().splitlines()
         repos = [line for line in consumers if re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", line)]
