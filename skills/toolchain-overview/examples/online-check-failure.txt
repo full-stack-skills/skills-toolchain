@@ -1,0 +1,5 @@
+Source: example-skills v1.2.3
+Locked SHA: 1111111111111111111111111111111111111111
+Resolved SHA: 2222222222222222222222222222222222222222
+Result: blocked; published ref no longer resolves to the locked commit
+Action: publish a new immutable version; do not refresh hashes in place

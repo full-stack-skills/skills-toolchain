@@ -4,8 +4,8 @@ L0 vendor tooling — the single home for the lockfile schema, lint gate, vendor
 script, and CI workflow templates that every skill package and plugin consumes.
 
 The two skills organizations (`full-aigc-skills`, `full-stack-skills`) ship
-their `skills.lock.json` against this toolchain; Codex plugins and WorkBuddy
-teams vendor the scripts and workflows verbatim into their own repositories.
+their `skills.lock.json` against this toolchain; Codex, ZCode, Kimi, and
+WorkBuddy consumers vendor the scripts and workflows verbatim into their own repositories.
 
 ## What's here
 
@@ -16,7 +16,7 @@ teams vendor the scripts and workflows verbatim into their own repositories.
 - `scripts/skill-template.md` — the canonical Skill body used by every package.
 - `workflows/skill-lint.yml` — pull_request + push gate.
 - `workflows/skill-sync.yml` — repository_dispatch / schedule / manual → PR.
-- `workflows/release-tag.yml` — push to main → tag → dispatch downstream.
+- `workflows/release-tag.yml` — push to main → immutable tag + GitHub Release → dispatch downstream.
 - `docs/lockfile-v1.md` — schema reference and upgrade path.
 - `docs/recipes/*.md` — per-host install recipes (Codex, WorkBuddy, custom).
 - `skills/toolchain-overview/` — the one Skill exposed by this package itself.
@@ -31,7 +31,7 @@ teams vendor the scripts and workflows verbatim into their own repositories.
 ## Versioning
 
 - `version` in `.claude-plugin/plugin.json` is the canonical release marker.
-- Each release updates `CHANGELOG.md` and creates one GitHub release; the
+- Each release bumps the package version and creates one immutable tag and GitHub Release; the
   `release-tag.yml` workflow dispatches `toolchain-updated` events so consumer
   repositories re-pin to the new SHA via their own `skill-sync.yml`.
 
@@ -42,16 +42,16 @@ In a skill package:
 ```bash
 git clone https://github.com/full-stack-skills/skills-toolchain /tmp/toolchain
 cp /tmp/toolchain/scripts/lint_skills.py scripts/
-cp /tmp/toolchain/workflow-templates/skill-lint.yml .github/workflows/lint.yml
+cp /tmp/toolchain/workflows/skill-lint.yml .github/workflows/lint.yml
 ```
 
-In a Codex / WorkBuddy plugin (also pins the vendor tool):
+In a Codex / ZCode / Kimi / WorkBuddy plugin (also pins the vendor tool):
 
 ```bash
 cp scripts/lint_skills.py /tmp/   # only the lint gate is unconditional
 cp /tmp/toolchain/scripts/skill_vendor.py scripts/vendor/
-cp /tmp/toolchain/workflow-templates/skill-check.yml .github/workflows/
-cp /tmp/toolchain/workflow-templates/skill-sync.yml .github/workflows/
+cp /tmp/toolchain/workflows/skill-check.yml .github/workflows/
+cp /tmp/toolchain/workflows/skill-sync.yml .github/workflows/
 ```
 
 Every copied file is byte-identical to the upstream copy; this is verified by

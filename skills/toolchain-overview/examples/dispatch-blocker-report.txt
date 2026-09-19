@@ -1,0 +1,5 @@
+Automation: repository_dispatch returned HTTP 403
+Source release: succeeded
+Target workflow: not started
+Boundary: SKILLS_SYNC_TOKEN lacks access to the target repository
+Action requiring owner approval: grant scoped target-repository access

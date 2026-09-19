@@ -1,0 +1,5 @@
+Version: v1.2.3
+Local commit: 3333333333333333333333333333333333333333
+Remote peeled tag: 3333333333333333333333333333333333333333
+GitHub Release: published for v1.2.3
+Result: source tag and Release identity are consistent

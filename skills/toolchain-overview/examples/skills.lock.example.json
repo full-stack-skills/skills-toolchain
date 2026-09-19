@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "package": "example-skills",
+      "repo": "https://github.com/example/example-skills.git",
+      "ref": "v1.2.3",
+      "sha": "0000000000000000000000000000000000000000",
+      "skills": [
+        "example-check"
+      ],
+      "dest": "skills/",
+      "sha256": {
+        "example-check": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    }
+  ]
+}
