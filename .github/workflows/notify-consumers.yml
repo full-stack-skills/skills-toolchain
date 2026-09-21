@@ -12,11 +12,11 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Notify consumer repositories
         env:
-          GH_TOKEN: ${{ secrets.SKILLS_SYNC_TOKEN }}
+          GH_TOKEN: ${{ secrets.FULL_STACK_SKILLS_SYNC_TOKEN || secrets.SKILLS_SYNC_TOKEN }}
         run: |
           set -euo pipefail
           if [ -z "${GH_TOKEN:-}" ]; then
-            echo "SKILLS_SYNC_TOKEN not configured; skipping consumer dispatch"
+            echo "FULL_STACK_SKILLS_SYNC_TOKEN not configured; skipping consumer dispatch"
             exit 0
           fi
           sha="${GITHUB_SHA}"
