@@ -1,0 +1,4 @@
+interface:
+  display_name: "Toolchain Overview"
+  short_description: "onboarding or diagnosing a Full Stack Skills or AIGC Skills…"
+  default_prompt: "Use $toolchain-overview to help with my current task: Use when onboarding or diagnosing a Full Stack Skills or AIGC Skills package/plugin that vendors Agent Skills: choose the correct lint, lockfile, vendor, synchronization, and…"
